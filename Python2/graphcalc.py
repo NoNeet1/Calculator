@@ -3,7 +3,6 @@ from tkinter import ttk
 from tkinter import messagebox
 import numpy as np
 import matplotlib.pyplot as plt
-import math
 
 root = tk.Tk()
 
@@ -28,7 +27,7 @@ def show(): #функция для создания графика
         if(Y1>Y2 and delY<=0):
             raise ValueError  #вызов ошибки, если введены неправильные данные
         if(selected_option=='Прямая'):
-            x_values = np.linspace(-10, 10, 100) #x принимает дл прямых графиков
+            x_values = np.linspace(-10, 10, 100) #x принимает для прямых графиков
             y_values = pow((a * pow(x_values,c))/b, 1/d)
         elif(selected_option=='sin(x)'):
             y_values=np.sin(pow(a*x_values,c))/b**(1/d)
@@ -60,24 +59,10 @@ def update_button(event):  # Функция для обновления кноп
     selected_option = combobox.get().strip()
     if selected_option == 'Прямая':
         button.config(text="Построить прямую")
-        
-        label1.config(text="*Y")
-
-        entry1.config(width=5, font=("Courier New", 12))
-
-        label2.config(text="^")
-
-        entry2.config(width=5, font=("Courier New", 12))
-
-        labequal.config(text="=")
 
         label3.config(text="*X")
 
         entry3.config(width=5, font=("Courier New", 12))
-
-        label4.config(text="^")
-
-        entry4.config(width=5, font=("Courier New", 12))
         
         label5.config(text="")
         
@@ -85,14 +70,6 @@ def update_button(event):  # Функция для обновления кноп
         
     elif selected_option == 'sin(x)':
         button.config(text="Построить sin(x)")
-       
-        label1.config(text="*Y")
-
-        entry1.config(width=5, font=("Courier New", 12))
-
-        label2.config(text="^")
-
-        entry2.config(width=5, font=("Courier New", 12))
 
         labequal.config(text="=sin(")
 
@@ -109,14 +86,6 @@ def update_button(event):  # Функция для обновления кноп
         
     elif selected_option == 'cos(x)':
         button.config(text="Построить cos(x)")
-        
-        label1.config(text="*Y")
-
-        entry1.config(width=5, font=("Courier New", 12))
-
-        label2.config(text="^")
-
-        entry2.config(width=5, font=("Courier New", 12))
 
         labequal.config(text="=cos(")
 
@@ -130,6 +99,7 @@ def update_button(event):  # Функция для обновления кноп
     
         label5.config(text=")")
         label5.config(width=5, font=("Courier New", 12))
+        
     elif selected_option == 'tg(x)':
         button.config(text="Построить tg(x)")
         
@@ -155,14 +125,6 @@ def update_button(event):  # Функция для обновления кноп
         label5.config(width=5, font=("Courier New", 12))
     elif selected_option == 'ctg(x)':
         button.config(text="Построить cos(x)")
-        
-        label1.config(text="*Y")
-
-        entry1.config(width=5, font=("Courier New", 12))
-
-        label2.config(text="^")
-
-        entry2.config(width=5, font=("Courier New", 12))
 
         labequal.config(text="=ctg(")
 
