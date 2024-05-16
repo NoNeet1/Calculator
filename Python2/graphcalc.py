@@ -3,6 +3,7 @@ from tkinter import ttk
 from tkinter import messagebox
 import numpy as np
 import matplotlib.pyplot as plt
+import unittest
 
 root = tk.Tk()
 
@@ -10,10 +11,10 @@ def show(): #функция для создания графика
     try:
         selected_option = combobox.get().strip() 
         #ввод данных
-        a = float(entry3.get().strip())
+        a = float(entry3.get().strip()) if entry3.winfo_ismapped() else 1.0
         b = float(entry1.get().strip())
         c = float(entry4.get().strip())
-        d = float(entry2.get().strip())
+        d = float(entry2.get().strip()) if entry2.winfo_ismapped() else 1.0
         Y1 = float(entry5.get().strip())
         Y2 = float(entry6.get().strip())
         delY=float(entry7.get().strip())
@@ -30,9 +31,8 @@ def show(): #функция для создания графика
             y_values = b * np.power(np.sin(np.power(d*x_values, a)), c)
         elif(selected_option=='cos(x)'):
             y_values = b * np.power(np.cos(np.power(d*x_values, a)), c)
-        #Пока что tg(x) и ctg(x) работают некорректно, если менять значения X внутри tg и ctg
         elif selected_option == 'tg(x)':
-            y_values = np.apply_along_axis(lambda x: np.squeeze(b * np.power(np.tan(np.power(d*x_values, a)), c)), 0, x_values)
+            y_values = b * np.power(np.tan(np.power(d * x_values, a)), c) 
             y_values[:-1][np.diff(np.sign(y_values)) != 0] = np.nan
         elif selected_option == 'ctg(x)':
             y_values = np.apply_along_axis(lambda x: np.squeeze(b * np.power(1/(np.tan(np.power(d*x_values, a))), c)) , 0, x_values)
@@ -46,10 +46,77 @@ def show(): #функция для создания графика
         plt.plot(x_values, y_values, '-r')
         plt.grid(True)
         plt.show()
+    
     except ValueError: #вызов ошибки, если введены не все данные
             button.config(state="disabled")  
             messagebox.showerror("Ошибка", "Некорректный ввод данных.")
             button.config(state="normal") 
+
+
+
+class TestShowFunction(unittest.TestCase):
+    def setUp(self):
+        self.combobox = ttk.Combobox(
+            root,
+            values=["Прямая", "sin(x)", "cos(x)", "tg(x)", "ctg(x)"],
+            state="readonly",
+        )
+        self.X1 = -10
+        self.X2 = 10
+        self.x_values = np.linspace(self.X1 * np.pi, self.X2 * np.pi, 1000)
+
+    def test_pram(self):
+        self.combobox.current(0)  # Выбор "Прямая"
+        a = 1
+        b = 1
+        c = 1
+        d = 1
+        y_value_at_zero = pow((a * pow(0, c)) / b, 1 / d)  # Вычисляем y для x = 0
+        self.assertAlmostEqual(y_value_at_zero, 0, places=4)
+        print("Прямая прошла проверку")
+
+    def test_sin(self):
+        self.combobox.current(1)  # Выбор "sin(x)"
+        a = 1
+        b = 1
+        c = 1
+        d = 1
+        y_value_at_zero = b * np.power(np.sin(np.power(d * 0, a)), c)  # Вычисляем y для x = 0
+        self.assertAlmostEqual(y_value_at_zero, 0, places=4)
+        print("Синус прошёл проверку")
+
+    def test_cos(self):
+        self.combobox.current(2)  # Выбор "cos(x)"
+        a = 1
+        b = 1
+        c = 1
+        d = 1
+        y_value_at_zero = b * np.power(np.cos(np.power(d * 0, a)), c )  # Вычисляем y для x = 0
+        self.assertAlmostEqual(y_value_at_zero, 1, places=4)
+        print("Косинус прошёл проверку")
+
+    def test_tg(self):
+        self.combobox.current(3)  # Выбор "tg(x)"
+        a = 1
+        b = 1
+        c = 1
+        d = 1
+        y_value_at_zero = b * np.power(np.tan(np.power(d * 0, a)), c)  # Вычисляем y для x = 0
+        self.assertAlmostEqual(y_value_at_zero, 0, places=4)  # Проверяем, что значение равно 0
+        print("Тангенс прошёл проверку")
+
+    def test_ctg(self):
+        self.combobox.current(4)  # Выбор "ctg(x)"
+        a = 1
+        b = 1
+        c = 1
+        d = 1
+        y_values = np.apply_along_axis(lambda x: np.squeeze( b * np.power(1 / (np.tan(np.power(d * self.x_values, a))), c)), 0,self.x_values,)
+        y_values[:-1][np.diff(np.sign(y_values)) != 0] = np.nan
+        pi_index = np.abs(self.x_values - np.pi).argmin()
+        self.assertTrue(np.isnan(y_values[pi_index]))
+        print("Котангенс прошёл проверку")
+        
            
 def update_button(event):  # Функция для обновления кнопки при изменении выбора
     selected_option = combobox.get().strip()
@@ -71,6 +138,7 @@ def update_button(event):  # Функция для обновления кноп
         label4.config(text="^")
         label4.grid(row=0,column=7)
         entry4.grid(row=0,column=8)
+
     else:
         #изменения вида интерфейса при выборе тригонометрической функции
         label1.config(text="Y") 
@@ -78,11 +146,20 @@ def update_button(event):  # Функция для обновления кноп
         entry1.grid(row=0,column=3)
         labequal.grid(row=0,column=4)
         entry2.grid(row=0,column=5)
-        label3.config(text="*X^")
         entry3.grid(row=0,column=7)
         label4.config(text=")^")
         label4.grid(row=0,column=8)
         entry4.grid(row=0,column=9)
+        #изменение вида при выборе tg(x) и ctg(x)
+        if selected_option == 'tg(x)' or selected_option == 'ctg(x)':
+            entry2.grid_remove()
+            entry3.grid_remove()
+            label3.config(text="x") 
+        else: #восстановление вида
+            entry2.grid()
+            entry3.grid()
+            label3.config(text="*X^")
+
         if selected_option=='sin(x)':
             button.config(text="Построить sin(x)")
             labequal.config(text="(sin(")
@@ -91,11 +168,10 @@ def update_button(event):  # Функция для обновления кноп
             labequal.config(text="(cos(")
         elif selected_option == 'tg(x)':
             button.config(text="Построить tg(x)")
-            labequal.config(text="(tg(")
+            labequal.config(text="tg(")
         elif selected_option == 'ctg(x)':
             button.config(text="Построить ctg(x)")
-            labequal.config(text="(ctg(")
-    
+            labequal.config(text="ctg(")
 
 #данные для вида окна       
 screen_width = root.winfo_screenwidth()
@@ -206,5 +282,6 @@ combobox.current(0)
 combobox.grid(row=1, column=0, columnspan=10, sticky="ew")
 combobox.bind("<<ComboboxSelected>>", update_button)
 
-root.mainloop()
-
+if __name__ == "__main__":
+    unittest.main(argv=["first-arg-is-ignored"], exit=False)  # Запуск тестов
+    root.mainloop()
